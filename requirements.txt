@@ -1,0 +1,19 @@
+Django==4.1.7
+djangorestframework==3.14.0
+Pillow==9.4.0
+
+# For phone number field
+django-phonenumber-field==7.0.2
+phonenumbers==8.13.6
+
+# For JWT authentication
+djangorestframework-simplejwt==5.2.2
+
+# For Swagger
+drf-yasg==1.21.5
+
+# For tests
+pytest-django==4.5.2
+pytest-order==1.0.1
+
+httpx==0.23.3
