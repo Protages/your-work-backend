@@ -48,6 +48,10 @@ python src/manage.py migrate
 python src/manage.py runserver
 ```
 
+### Документация
+Для удобного ознакомления лучше перейти на http://127.0.0.1:8000/docs/ где распологается Swagger UI
+
+
 ## Запуск тестов
 Запуск интеграционных тестов
 ```properties
