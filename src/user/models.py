@@ -63,6 +63,22 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(verbose_name='active', default=True)
 
     USERNAME_FIELD = 'email'
+
+    def get_user_type(self) -> str | Exception:
+        '''Return type of user in str: `company` or `candidate`'''
+        if self.company is not None:
+            return 'company'
+        elif self.candidate is not None:
+            return 'candidate'
+        return Exception('User dosnt have related company or candidate')
+    
+    def get_related_object_id_by_user_type(self) -> int | Exception:
+        '''Return id of related object (`company` or `candidate`) of the user'''
+        if self.company is not None:
+            return self.company.pk
+        elif self.candidate is not None:
+            return self.candidate.pk
+        return Exception('User dosnt have related company or candidate')
     
 
 class Staff(models.Model):

@@ -35,7 +35,7 @@ class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
 
     @swagger_auto_schema(responses={200: CompanyResponseSerializer(many=True)})
     def list(self, request: Request):
-        queryset = Company.objects.all()
+        queryset = Company.objects.select_related('owner').all()
         serializer = CompanySerializer(queryset, many=True)
         return Response(serializer.data)
         
@@ -60,7 +60,7 @@ class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
 
     @swagger_auto_schema(responses={200: CompanyResponseSerializer()})
     def retrieve(self, request: Request, pk=None):
-        queryset = Company.objects.all()
+        queryset = Company.objects.select_related('owner').all()
         company = get_object_or_404(queryset, pk=pk)
         serializer = CompanySerializer(company)
         return Response(serializer.data)
@@ -95,7 +95,7 @@ class CandidateViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(responses={200: CandidateResponseSerializer(many=True)})
     def list(self, request: Request):
-        queryset = Candidate.objects.all()
+        queryset = Candidate.objects.select_related('user').all()
         serializer = CandidateSerializer(queryset, many=True)
         return Response(serializer.data)
         
@@ -117,7 +117,7 @@ class CandidateViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(responses={200: CandidateResponseSerializer()})
     def retrieve(self, request: Request, pk=None):
-        queryset = Candidate.objects.all()
+        queryset = Candidate.objects.select_related('user').all()
         candidate = get_object_or_404(queryset, pk=pk)
         serializer = CandidateSerializer(candidate)
         return Response(serializer.data)
@@ -139,7 +139,11 @@ class CandidateViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class VacancyViewSet(viewsets.ViewSet):
+class VacancyViewSet(PermissionMixin, viewsets.ViewSet):
+    # permission_classes_by_action = {
+    #     'list': [IsAuthenticated]
+    # }
+
     @swagger_auto_schema(request_body=VacancySerializer)
     def create(self, request: Request):
         serializer = VacancySerializer(data=request.data)

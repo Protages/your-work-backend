@@ -1,6 +1,7 @@
 Django==4.1.7
 djangorestframework==3.14.0
 Pillow==9.4.0
+django-cors-headers==3.14.0
 
 # For phone number field
 django-phonenumber-field==7.0.2
@@ -16,4 +17,7 @@ drf-yasg==1.21.5
 pytest-django==4.5.2
 pytest-order==1.0.1
 
+# For create MVP database
 httpx==0.23.3
+
+django-debug-toolbar==3.8.1

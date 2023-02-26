@@ -8,9 +8,10 @@ from rest_framework.mixins import (
     UpdateModelMixin,
     DestroyModelMixin
 )
+from rest_framework_simplejwt.views import TokenObtainPairView as BaseTokenObtainPairView
 
 from user.models import User
-from user.serializers import UserSerializer
+from user.serializers import UserSerializer, TokenObtainPairSerializer
 
 
 class UserListCreateAPI(ListModelMixin, CreateModelMixin, GenericAPIView):
@@ -38,3 +39,7 @@ class UserRetriveUpdateDeleteAPI(
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+    
+
+class TokenObtainPairView(BaseTokenObtainPairView):
+    serializer_class = TokenObtainPairSerializer
