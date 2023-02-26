@@ -11,10 +11,17 @@
 - `pytest` - используется для тестирования (т.к. встроенное Django тестирование не дает удобных гибких настроек)
 - `django-debug-toolbar` - позволяет отслеживать запросы к БД
 
+## Frontend приложение
+Имеется примитивное frontend app для этого REST API. Для запуска следуйте инструкциям в git репозитории - https://github.com/Protages/your-work-frontend
+
 ## Запуск
 Клонируем GitHub репозиторий
 ```properties
 git clone https://github.com/Protages/your-work-backend
+```
+Переходим в папку проекта
+```properties
+cd your-work
 ```
 Создаем виртуальное окружение, активируем и устанавливаем зависимости
 ```properties
@@ -34,6 +41,9 @@ email: `company_1@mail.com`, password: `company1pass`
 
 #### Данные для входа как соискатель
 email: `canditate_1@mail.com`, password: `canditate1pass`
+
+
+При необходимости можно использовать другие данные, смотрите в `src/tests/endpoints/data/` файлы `company_data.py` и `candidate_data.py` соответсвенно 
 
 ### Если не создавали MVP базу данных
 Создаем базу данных в ручную и применяем миграции
