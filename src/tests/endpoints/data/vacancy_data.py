@@ -51,7 +51,6 @@ vacancy_valid_reponse = [
         "salary": 170000,
         'required_experience': 2,
         "skills": "some_skills1",
-        'img': None,
         "description": "some_description1",
         "company": 1
     },
@@ -61,7 +60,6 @@ vacancy_valid_reponse = [
         "salary": 80000,
         'required_experience': 1,
         "skills": "some_skills2",
-        'img': None,
         "description": "some_description2",
         "company": 1
     },
@@ -71,7 +69,6 @@ vacancy_valid_reponse = [
         "salary": 150000,
         'required_experience': 3,
         "skills": "some_skills3",
-        'img': None,
         "description": "some_description3",
         "company": 1
     },
@@ -81,7 +78,6 @@ vacancy_valid_reponse = [
         "salary": 300000,
         'required_experience': None,
         "skills": "some_skills4",
-        'img': None,
         "description": "some_description4",
         "company": 1
     },
@@ -91,7 +87,6 @@ vacancy_valid_reponse = [
         "salary": 100000,
         'required_experience': None,
         "skills": "some_skills5",
-        'img': None,
         "description": "some_description5",
         "company": 1
     }
@@ -162,7 +157,6 @@ update_vacancy_valid_response = {
     "salary": 90000,
     'required_experience': 1,
     "skills": "some_skills1_update",
-    'img': None,
     "description": "some_description1_update",
     "company": 1
 }

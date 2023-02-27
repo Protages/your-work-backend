@@ -4,10 +4,14 @@ from django.db import models
 from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
 
+from app.storage import OverwriteStorage
 
-def upload_to_vacancy(instance, filename):
+
+def upload_to_vacancy(instance, filename: str):
     '''Specifies download path and file name'''
-    return os.path.join('vacancies', str(filename))
+    extension = filename.split('.')[-1]
+    filename = f'image.{extension}'
+    return os.path.join('vacancies', str(instance.id), filename)
 
 
 def upload_to_cv_file(instance, filename):
@@ -47,7 +51,10 @@ class Vacancy(models.Model):
     skills = models.TextField(verbose_name='necessary skills')
     description = models.TextField('description')
     img = models.ImageField(
-        verbose_name='image', upload_to=upload_to_vacancy, blank=True, null=True
+        verbose_name='image',
+        upload_to=upload_to_vacancy,
+        storage=OverwriteStorage,
+        blank=True, null=True
     )
     company = models.ForeignKey(
         to=Company, 
