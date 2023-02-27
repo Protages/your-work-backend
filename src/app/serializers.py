@@ -89,6 +89,23 @@ class CandidateSerializer(CustomSerializer, CandidateMixin):
         return Candidate
 
 
+class VacancyUploadImageSerializer(CustomSerializer):
+    img = serializers.ImageField()
+
+    def create(self, validated_data: dict):
+        raise Exception(
+            'VacancyUploadImageSerializer dosnt create instance, only update'
+        )
+
+    def update(self, instance: Vacancy, validated_data: dict) -> Vacancy:
+        instance.img = validated_data.get('img')
+        instance.save()
+        return instance
+
+    def get_model(self):
+        return Vacancy
+
+
 class VacancyUpdateSerializer(CustomSerializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(max_length=128)
@@ -96,7 +113,6 @@ class VacancyUpdateSerializer(CustomSerializer):
     required_experience = serializers.IntegerField(required=False)
     skills = serializers.CharField()
     description = serializers.CharField()
-    img = serializers.ImageField(required=False)
 
     def validate_salary(self, value: int) -> int:
         if value < settings.MIN_SALARY:

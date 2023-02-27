@@ -1,22 +1,24 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import QuerySet
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, parser_classes
 from rest_framework.views import Response
 from rest_framework.request import Request
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import MultiPartRenderer, JSONRenderer
 from drf_yasg.utils import swagger_auto_schema
 
 from app.mixins import PermissionMixin
+from app.renderers import ImageRenderer
 from app.models import Company, Vacancy, Candidate, Experience, Reaction
 from app.serializers import (
     CompanySerializer, CompanyCreateSerializer, CompanyResponseSerializer,
     CandidateSerializer, CandidateCreateSerializer, CandidateResponseSerializer,
-    VacancySerializer, VacancyUpdateSerializer,
+    VacancySerializer, VacancyUpdateSerializer, VacancyUploadImageSerializer,
     ExperienceSerializer, ExperienceUpdateSerializer,
     ReactionSerializer, ReactionUpdateSerializer,
 )
-from app.serializers_mixins import CompanyMixin, CandidateMixin
 
 
 class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
@@ -143,6 +145,7 @@ class VacancyViewSet(PermissionMixin, viewsets.ViewSet):
     # permission_classes_by_action = {
     #     'list': [IsAuthenticated]
     # }
+    # parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(request_body=VacancySerializer)
     def create(self, request: Request):
@@ -181,6 +184,21 @@ class VacancyViewSet(PermissionMixin, viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+    
+    @swagger_auto_schema(method='get')
+    @swagger_auto_schema(method='post', request_body=VacancyUploadImageSerializer)
+    @action(
+        methods=['post', 'get'], url_path='image', detail=True,
+        parser_classes=[MultiPartParser],
+        renderer_classes=[ImageRenderer, JSONRenderer]
+    )
+    def upload_image(self, request: Request, pk=None):
+        instance = Vacancy.objects.get(pk=pk)
+        if request.method == 'POST':
+            serializer = VacancyUploadImageSerializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return Response(instance.img.file, content_type='image/png')
 
     def destroy(self, request: Request, pk=None):
         instance = Vacancy.objects.get(pk=pk)
