@@ -6,6 +6,7 @@ from django.test.utils import setup_databases, teardown_databases
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models import User
+from tests.utils import get_superuser_access_token
 
 
 @pytest.fixture(scope='session')
@@ -59,13 +60,9 @@ def api_client(db_no_rollback):
     `APIClient` with header `HTTP_AUTHORIZATION=Bearer superuser_access_token`
     for access to all endpoints.
     '''
-
-    superuser = User.objects.create_superuser(
-        email='superuser@mail.com', password='superuserpass'
-    )
-    token = RefreshToken.for_user(superuser)
+    access_token = get_superuser_access_token()
     client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token.access_token))
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token)
     yield client
 
 

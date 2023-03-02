@@ -46,6 +46,9 @@ email: `company_1@mail.com`, password: `company1pass`
 #### Данные для входа как соискатель
 email: `canditate_1@mail.com`, password: `canditate1pass`
 
+#### Данные для входа как суперпользователь
+email: `superuser@mail.com`, password: `superuserpass`
+
 
 При необходимости можно использовать другие данные, смотрите в `src/tests/endpoints/data/` файлы `company_data.py` и `candidate_data.py` соответственно 
 
@@ -70,7 +73,7 @@ python src/manage.py runserver
 ## Запуск тестов
 Запуск интеграционных тестов
 ```properties
-pytest --verbosity=2 --order-group-scope=module
+pytest src/ --verbosity=2 --order-group-scope=module
 ```
 
 ## Прочее
