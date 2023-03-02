@@ -1,8 +1,11 @@
 import pytest
 
 from django.conf import settings
-from django.test import Client
+from rest_framework.test import APIClient
 from django.test.utils import setup_databases, teardown_databases
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from user.models import User
 
 
 @pytest.fixture(scope='session')
@@ -52,6 +55,20 @@ def db_no_rollback(request, django_db_setup, django_db_blocker) -> None:
 
 @pytest.fixture(scope='session')
 def api_client(db_no_rollback):
-    from rest_framework.test import APIClient
+    '''
+    `APIClient` with header `HTTP_AUTHORIZATION=Bearer superuser_access_token`
+    for access to all endpoints.
+    '''
 
+    superuser = User.objects.create_superuser(
+        email='superuser@mail.com', password='superuserpass'
+    )
+    token = RefreshToken.for_user(superuser)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(token.access_token))
+    yield client
+
+
+@pytest.fixture(scope='session')
+def api_client_without_access_token(db_no_rollback):
     yield APIClient()
