@@ -170,6 +170,17 @@ class ReactionUpdateSerializer(CustomSerializer):
         return Reaction
 
 
+class ReactionUpdateStatusSerializer(CustomSerializer):
+    id = serializers.IntegerField(read_only=True)
+    status = serializers.ChoiceField(
+        choices=Reaction.REACTION_STATUS, default=Reaction.NOT_VIEWED
+    )
+    cv = serializers.FileField(required=False)
+
+    def get_model(self):
+        return Reaction
+
+
 class ReactionSerializer(ReactionUpdateSerializer):
     candidate = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all())
     vacancy = serializers.PrimaryKeyRelatedField(queryset=Vacancy.objects.all())

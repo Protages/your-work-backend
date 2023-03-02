@@ -1,8 +1,11 @@
+from typing import Callable
 from collections import OrderedDict
 
+from rest_framework.request import Request
 from rest_framework.serializers import Serializer
 from rest_framework.fields import SkipField
 from rest_framework.relations import PKOnlyObject
+from rest_framework.permissions import IsAdminUser
 
 from app.models import Company, Candidate
 from user.serializer_mixins import UserMixin
@@ -41,3 +44,17 @@ def to_representation_with_user(
             ret[field.field_name] = field.to_representation(attribute)
 
     return ret
+
+
+def is_admin_or_superuser(func: Callable):
+    '''
+    Decorator for `has_permission` method that returns True if the user is
+    an `admin` or `superuser`.\n 
+    Otherwise result of `has_permission` execution.
+    '''
+    def wrapper(self, request: Request, view) -> bool:
+        if request.user and request.user.is_authenticated \
+                and (request.user.is_staff or request.user.is_superuser):
+            return True
+        return func(self, request, view)
+    return wrapper

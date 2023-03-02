@@ -4,27 +4,44 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action, parser_classes
 from rest_framework.views import Response
 from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.renderers import MultiPartRenderer, JSONRenderer
 from drf_yasg.utils import swagger_auto_schema
 
 from app.mixins import PermissionMixin
 from app.renderers import ImageRenderer
+from app.permissions import (
+    IsReadOnly,
+    IsOwnerCompanyOrCandidate, 
+    IsCompany,
+    IsCompanyAndOwnerVacancy,
+    IsCandidate,
+    IsCandidateAndOwnerExperience,
+    IsCandidateAndOwnerReaction,
+    IsCompanyAndOwnerVacancyOnReaction,
+)
 from app.models import Company, Vacancy, Candidate, Experience, Reaction
 from app.serializers import (
     CompanySerializer, CompanyCreateSerializer, CompanyResponseSerializer,
     CandidateSerializer, CandidateCreateSerializer, CandidateResponseSerializer,
     VacancySerializer, VacancyUpdateSerializer, VacancyUploadImageSerializer,
     ExperienceSerializer, ExperienceUpdateSerializer,
-    ReactionSerializer, ReactionUpdateSerializer,
+    ReactionSerializer, ReactionUpdateSerializer, ReactionUpdateStatusSerializer,
 )
 
 
 class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
-    # permission_classes_by_action = {
-    #     'list': [IsAuthenticated]
-    # }
+    permission_classes_by_action = {
+        'create': [AllowAny],
+        'list': [IsAuthenticated],
+        'list_vacancy': [IsAuthenticated],
+        'list_reaction': [IsOwnerCompanyOrCandidate],
+        'retrieve': [IsAuthenticated],
+        'update': [IsOwnerCompanyOrCandidate],
+        'destroy': [IsOwnerCompanyOrCandidate],
+    }
+
     @swagger_auto_schema(
         request_body=CompanyCreateSerializer, 
         responses={201: CompanyResponseSerializer()}
@@ -50,7 +67,7 @@ class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
         return Response(serializer.data)
     
     @swagger_auto_schema(responses={200: ReactionSerializer(many=True)})
-    @action(methods=['get'], url_path='reaction', detail=True)
+    @action(detail=True, methods=['get'], url_path='reaction')
     def list_reaction(self, request: Request, pk=None):
         company: Company = get_object_or_404(Company.objects.all(), pk=pk)
         vacancies: QuerySet[int] = company.vacancies.values_list('id', flat=True)
@@ -84,7 +101,17 @@ class CompanyViewSet(PermissionMixin, viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CandidateViewSet(viewsets.ViewSet):
+class CandidateViewSet(PermissionMixin, viewsets.ViewSet):
+    permission_classes_by_action = {
+        'create': [AllowAny],
+        'list': [IsCompany],
+        'list_experience': [IsOwnerCompanyOrCandidate|IsCompany],
+        'list_reaction': [IsOwnerCompanyOrCandidate],
+        'retrieve': [IsOwnerCompanyOrCandidate|IsCompany],
+        'update': [IsOwnerCompanyOrCandidate],
+        'destroy': [IsOwnerCompanyOrCandidate],
+    }
+
     @swagger_auto_schema(
         request_body=CandidateCreateSerializer, 
         responses={201: CandidateResponseSerializer()}
@@ -142,10 +169,15 @@ class CandidateViewSet(viewsets.ViewSet):
 
 
 class VacancyViewSet(PermissionMixin, viewsets.ViewSet):
-    # permission_classes_by_action = {
-    #     'list': [IsAuthenticated]
-    # }
-    # parser_classes = (MultiPartParser, FormParser)
+    permission_classes_by_action = {
+        'create': [IsCompany],
+        'list': [AllowAny],
+        'list_reaction': [IsCompanyAndOwnerVacancy],
+        'retrieve': [AllowAny],
+        'update': [IsCompanyAndOwnerVacancy],
+        'upload_image': [IsReadOnly|IsCompanyAndOwnerVacancy],
+        'destroy': [IsCompanyAndOwnerVacancy],
+    }
 
     @swagger_auto_schema(request_body=VacancySerializer)
     def create(self, request: Request):
@@ -206,7 +238,15 @@ class VacancyViewSet(PermissionMixin, viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ExperienceViewSet(viewsets.ViewSet):
+class ExperienceViewSet(PermissionMixin, viewsets.ViewSet):
+    permission_classes_by_action = {
+        'create': [IsCandidate],
+        'list': [IsCompany],
+        'retrieve': [IsCompany|IsCandidateAndOwnerExperience],
+        'update': [IsCandidateAndOwnerExperience],
+        'destroy': [IsCandidateAndOwnerExperience],
+    }
+
     @swagger_auto_schema(request_body=ExperienceSerializer)
     def create(self, request: Request):
         serializer = ExperienceSerializer(data=request.data)
@@ -244,7 +284,20 @@ class ExperienceViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ReactionViewSet(viewsets.ViewSet):
+class ReactionViewSet(PermissionMixin, viewsets.ViewSet):
+    permission_classes_by_action = {
+        'create': [IsCandidate],
+        'list': [IsCompany],
+        'retrieve': [IsCandidateAndOwnerReaction|IsCompanyAndOwnerVacancyOnReaction],
+        'update': [IsCandidateAndOwnerReaction],
+        # reaction status can update owner-candidate or
+        # company that owns the vacancy for which reaction was written
+        'update_status': [
+            IsCandidateAndOwnerReaction|IsCompanyAndOwnerVacancyOnReaction
+        ],
+        'destroy': [IsCandidateAndOwnerReaction],
+    }
+
     @swagger_auto_schema(request_body=ReactionSerializer)
     def create(self, request: Request):
         serializer = ReactionSerializer(data=request.data)
@@ -269,6 +322,18 @@ class ReactionViewSet(viewsets.ViewSet):
         request_body=ReactionUpdateSerializer, responses={200: ReactionSerializer()}
     )
     def update(self, request: Request, pk=None):
+        instance = Reaction.objects.get(pk=pk)
+        serializer = ReactionSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
+    @swagger_auto_schema(
+        request_body=ReactionUpdateStatusSerializer, 
+        responses={200: ReactionSerializer()}
+    )
+    @action(methods=['put'], detail=True, url_path='status')
+    def update_status(self, request: Request, pk=None):
         instance = Reaction.objects.get(pk=pk)
         serializer = ReactionSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

@@ -70,6 +70,18 @@ class User(AbstractBaseUser):
             return 'company'
         elif self.candidate is not None:
             return 'candidate'
+        if self.is_staff or self.is_superuser:
+            return 'admin'
+        return Exception('User dosnt have related company or candidate')
+    
+    def get_related_object_by_user_type(self) -> int | Exception:
+        '''Return id of related object (`company` or `candidate`) of the user'''
+        if self.company is not None:
+            return self.company
+        elif self.candidate is not None:
+            return self.candidate
+        if self.is_staff or self.is_superuser:
+            return None
         return Exception('User dosnt have related company or candidate')
     
     def get_related_object_id_by_user_type(self) -> int | Exception:
@@ -78,6 +90,8 @@ class User(AbstractBaseUser):
             return self.company.pk
         elif self.candidate is not None:
             return self.candidate.pk
+        if self.is_staff or self.is_superuser:
+            return None
         return Exception('User dosnt have related company or candidate')
     
 
