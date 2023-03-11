@@ -1,6 +1,7 @@
 import pytest
+import os
 
-from django.conf import settings
+from django.conf import settings as base_settings
 from rest_framework.test import APIClient
 from django.test.utils import setup_databases, teardown_databases
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,18 +11,7 @@ from tests.utils import get_superuser_access_token
 
 
 @pytest.fixture(scope='session')
-def django_db_modify_db_settings():
-    '''Set new database settings. ATOMIC_REQUESTS required for pytest-django(?)'''
-
-    settings.DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': settings.BASE_DIR / 'testdb.sqlite3',
-        'ATOMIC_REQUESTS': True
-    }
-
-
-@pytest.fixture(scope='session')
-def django_db_setup(request, django_db_modify_db_settings, django_db_blocker) -> None:
+def django_db_setup(request, django_db_blocker) -> None:
     '''Create temporary database and after all tests teardown it'''
 
     with django_db_blocker.unblock():
