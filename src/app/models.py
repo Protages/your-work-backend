@@ -44,7 +44,7 @@ class Company(models.Model):
 
 class Vacancy(models.Model):
     title = models.CharField(verbose_name='title', max_length=128)
-    salary = models.PositiveSmallIntegerField(verbose_name='salary in rub')
+    salary = models.PositiveIntegerField(verbose_name='salary in rub')
     required_experience = models.PositiveSmallIntegerField(
         verbose_name='required years of experience', blank=True, null=True
     )
@@ -99,7 +99,7 @@ class Candidate(models.Model):
         default=SEARCH,
         max_length=8
     )
-    salary = models.PositiveSmallIntegerField(
+    salary = models.PositiveIntegerField(
         verbose_name='salary', blank=True, null=True
     )
     education = models.TextField(verbose_name='education', blank=True, null=True)
