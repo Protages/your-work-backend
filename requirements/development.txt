@@ -1,0 +1,6 @@
+# Install basic requested packages from base.txt
+-r ./base.txt
+
+# For ASGI application
+uvicorn==0.21.1
+gunicorn==20.1.0

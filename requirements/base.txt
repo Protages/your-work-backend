@@ -3,6 +3,9 @@ djangorestframework==3.14.0
 Pillow==9.4.0
 django-cors-headers==3.14.0
 
+# For PostgreSQL database
+psycopg2-binary==2.9.5
+
 # For phone number field
 django-phonenumber-field==7.0.2
 phonenumbers==8.13.6
