@@ -10,6 +10,10 @@ from django.contrib.auth.hashers import make_password
 from app.models import Company, Candidate
 
 
+COMPANY_ALIAS = 'company'
+CANDIDATE_ALIAS = 'candidate'
+
+
 class UserManager(BaseUserManager):
     # use_in_migrations = True
 
@@ -67,9 +71,9 @@ class User(AbstractBaseUser):
     def get_user_type(self) -> str | Exception:
         '''Return type of user in str: `company` or `candidate`'''
         if self.company is not None:
-            return 'company'
+            return COMPANY_ALIAS
         elif self.candidate is not None:
-            return 'candidate'
+            return CANDIDATE_ALIAS
         if self.is_staff or self.is_superuser:
             return 'admin'
         return Exception('User dosnt have related company or candidate')

@@ -3,6 +3,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_MET
 
 from app.utils import is_admin_or_superuser
 from app.models import Vacancy, Experience, Reaction
+from user.models import COMPANY_ALIAS, CANDIDATE_ALIAS
 
 
 class IsReadOnly(BasePermission):
@@ -41,7 +42,7 @@ class IsCompany(IsAuthenticated):
         if not super().has_permission(request, view):
             return False
         # check if user related object is Company
-        return request.user.get_user_type() == 'company'
+        return request.user.get_user_type() == COMPANY_ALIAS
     
 
 class IsCompanyAndOwnerVacancy(IsCompany):
@@ -73,7 +74,7 @@ class IsCandidate(IsAuthenticated):
         if not super().has_permission(request, view):
             return False
         # check if user related object is Candidate
-        return request.user.get_user_type() == 'candidate'
+        return request.user.get_user_type() == CANDIDATE_ALIAS
     
 
 class IsCandidateAndOwnerExperience(IsCandidate):
