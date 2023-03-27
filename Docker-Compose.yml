@@ -10,20 +10,20 @@ services:
       - 8000:8000
     env_file:
       - .env.dev
-    depends_on:
-      - db
+#     depends_on:
+#       - db
 
-  db:
-    image: postgres:15.0-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - 6432:5432
-    env_file:
-      - .env.dev.db
+#   db:
+#     image: postgres:15.0-alpine
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data/
+#     ports:
+#       - 6432:5432
+#     env_file:
+#       - .env.dev.db
 
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:
 
 # command: bash -c "cd src && python -m gunicorn core.asgi:application -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker"
 # command: bash -c "cd src && python -m uvicorn core.asgi:application --host 0.0.0.0 --port 8000"
